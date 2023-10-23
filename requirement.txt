@@ -1,0 +1,8 @@
+pandas
+streamlit
+plotly.express
+plotly.graph_objs
+plotly.subplots 
+time
+numpy
+plotly.express
