@@ -1,0 +1,241 @@
+from supabase import create_client
+import pandas as pd
+import streamlit as st
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.fft import fft, fftshift
+import altair as alt
+import plotly.express as px
+import numpy as np
+import plotly.express as px
+import time
+
+
+# Ganti dengan informasi Supabase Anda
+API_URL = 'https://tytohrcddnmmkqazxhuc.supabase.co'
+API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5dG9ocmNkZG5tbWtxYXp4aHVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTczODAzNDMsImV4cCI6MjAxMjk1NjM0M30.v-Hag5MMPDDRiHS3Z--WbUfMo_aNIFooN1vja5CaI7k'  # Ganti dengan kunci API Anda
+
+# Inisialisasi klien Supabase
+supabase = create_client(API_URL, API_KEY)
+
+import streamlit as st
+
+# Inisialisasi halaman Streamlit
+st.set_page_config(page_title="Dashboard", layout='wide', initial_sidebar_state='collapsed')
+
+# ...
+
+# Buat tampilan judul dengan latar belakang putih
+st.markdown(
+    """
+    <style>
+    body {
+        background-color: white;
+    }
+    .blue-rectangle {
+        background-color: maroon;
+        padding: 10px 170px;
+        border-radius: 2px;
+        display: inline-block;
+    }
+    </style>
+    <div style="text-align: center; font-family: Arial Black; font-size: 50px;">
+    <div class="blue-rectangle">SISTEM INFORMASI MONITORING GETARAN MESIN</div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# Tambahkan teks tentang kegunaan web
+st.write("Selamat datang di Sistem Informasi Monitoring Getaran Mesin. Website ini dirancang untuk memantau dan menganalisis data getaran mesin. Anda dapat melihat data tachometer termasuk akselerasi dalam bentuk grafik Time Domain, dan analisis Domain Frekuensi. Data diambil sebanyak 2100 data, dengan delay 2 ms.")
+
+
+
+while True:
+    supabaseList = supabase.table('maintable').select('*').execute().data
+
+    df = pd.DataFrame()
+    for row in supabaseList:
+        row["created_at"] = row["created_at"].split(".")[0]
+        row["time"] = row["created_at"].split("T")[1]
+        row["date"] = row["created_at"].split("T")[0]
+        row["DateTime"] = row["id"]
+        df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+
+
+    # Ambil data acceleration_x, acceleration_y, dan acceleration_z dari ID terbaru
+    latest_data = df.iloc[-1]  # Mengambil data terbaru
+    selected_data_x = latest_data['acceleration_x']
+    selected_data_y = latest_data['acceleration_y']
+    selected_data_z = latest_data['acceleration_z']
+    selected_id = latest_data['created_at']  # Mengambil timestamp data terbaru
+
+
+    # Hapus karakter '[' dan ']' dari string
+    selected_data_x = selected_data_x.strip('[]')
+    selected_data_y = selected_data_y.strip('[]')
+    selected_data_z = selected_data_z.strip('[]')
+
+   # Ganti koma (',') dengan titik desimal ('.') dan pisahkan string menjadi daftar nilai numerik
+    selected_data_values_x = [float(val.replace(',', '.')) for val in selected_data_x.split(',')]
+    selected_data_values_y = [float(val.replace(',', '.')) for val in selected_data_y.split(',')]
+    selected_data_values_z = [float(val.replace(',', '.')) for val in selected_data_z.split(',')]
+
+    # Hitung Peak, RMS, Average, dan Peak to Peak untuk ketiga kolom akselerasi
+    peak_x = np.max(np.abs(selected_data_values_x))
+    rms_x = 0.707 * peak_x
+    average_x = 0.637 * peak_x
+    peak_to_peak_x = np.max(selected_data_values_x) - np.min(selected_data_values_x)
+
+    peak_y = np.max(np.abs(selected_data_values_y))
+    rms_y = 0.707 * peak_y
+    average_y = 0.637 * peak_y
+    peak_to_peak_y = np.max(selected_data_values_y) - np.min(selected_data_values_y)
+
+    peak_z = np.max(np.abs(selected_data_values_z))
+    rms_z = 0.707 * peak_z
+    average_z = 0.637 * peak_z
+    peak_to_peak_z = np.max(selected_data_values_z) - np.min(selected_data_values_z)
+
+    # Tentukan warna berdasarkan nilai puncak
+    def get_warning_info(peak):
+        if peak > 1:
+            return ("red", "Bahaya 🚨🚨🚨")
+        else:
+            return ("green", "Aman")
+
+    # Tampilkan tabel dengan nilai-nilai Peak, RMS, Average, dan Peak to Peak
+    st.write("Nilai-nilai Akselerasi:")
+    data = {
+        'Arah': ['Axial', 'Radial Y', 'Radial Z'],
+        'Peak': [peak_x, peak_y, peak_z],
+        'RMS': [rms_x, rms_y, rms_z],
+        'Average': [average_x, average_y, average_z],
+        'Peak to Peak': [peak_to_peak_x, peak_to_peak_y, peak_to_peak_z],
+        'Kondisi': [f'<span style="color: {get_warning_info(peak_x)[0]}">{get_warning_info(peak_x)[1]}</span>',
+                    f'<span style="color: {get_warning_info(peak_y)[0]}">{get_warning_info(peak_y)[1]}</span>',
+                    f'<span style="color: {get_warning_info(peak_z)[0]}">{get_warning_info(peak_z)[1]}</span>']
+    }
+
+    # Convert the data to DataFrame
+    df_table = pd.DataFrame(data)
+
+    # CSS untuk membuat nilai-nilai menjadi rata tengah
+    css = """
+    td {
+        text-align: center;
+    }
+    """
+    # Render the HTML properly
+    st.write(f'<style>{css}</style>', unsafe_allow_html=True)
+    st.write(df_table.to_html(escape=False), unsafe_allow_html=True)
+
+
+    # Buat tempat kosong awal untuk grafik
+    spedometer_chart = st.empty()
+    row1, row2, row3 = st.columns([3, 3, 3])
+    acceleration_x_chart = row1.empty()
+    acceleration_y_chart = row2.empty()
+    acceleration_z_chart = row3.empty()
+
+    # ... (kode sebelumnya)
+    row1, row2, row3 = st.columns([3, 3, 3])
+    # Inisialisasi objek chart FFT untuk X, Y, dan Z
+    acceleration_fft_x_chart = row1.empty()
+    acceleration_fft_y_chart = row2.empty()
+    acceleration_fft_z_chart = row3.empty()
+
+
+    # Waktu antara setiap data dalam milidetik (ms)
+    time_step_ms = 3
+
+    # Jumlah data
+    num_data_points = 1500
+
+    # Waktu total yang dicakup dalam data (detik)
+    total_time_seconds = (time_step_ms * num_data_points) / 1000  # Konversi dari ms ke detik
+
+    # Data waktu (dalam detik)
+    time_values = [i * (time_step_ms / 1000) for i in range(num_data_points)]
+
+    # Membuat DataFrame untuk akselerasi X, Y, dan Z
+    data = {
+        'Time (s)': time_values,
+        'Akselerasi X': selected_data_values_x,
+        'Akselerasi Y': selected_data_values_y,
+        'Akselerasi Z': selected_data_values_z
+    }
+    df = pd.DataFrame(data)
+
+    # Membuat grafik akselerasi X, Y, dan Z dalam domain waktu dengan Plotly Express
+    fig_x = px.line(df, x='Time (s)', y='Akselerasi X', title=f'Time Domain {selected_id}', width=600, height=400)
+    fig_x.update_traces(line=dict(color='blue', width=0.6), name='Akselerasi X')
+    fig_x.update_xaxes(title_text='Waktu (detik)')
+    fig_x.update_yaxes(title_text='Amplitudo (mm/s²)')
+
+
+    fig_y = px.line(df, x='Time (s)', y='Akselerasi Y', title=f'Time Domain {selected_id}', width=600, height=400)
+    fig_y.update_traces(line=dict(color='blue', width=0.6), name='Akselerasi Y')
+    fig_y.update_xaxes(title_text='Waktu (detik)')
+    fig_y.update_yaxes(title_text='Amplitudo (mm/s²)')
+
+    # Konversi data ke DataFrame
+    df_acceleration_y = pd.DataFrame({'Time (s)': time_values, 'Akselerasi Y': selected_data_values_y})
+
+    # Menampilkan tabel dalam aplikasi Streamlit
+    st.write("Tabel Akselerasi Y")
+    st.dataframe(df_acceleration_y)
+
+    fig_z = px.line(df, x='Time (s)', y='Akselerasi Z', title=f'Time Domain {selected_id}', width=600, height=400)
+    fig_z.update_traces(line=dict(color='blue', width=0.6), name='Akselerasi Z')
+    fig_z.update_xaxes(title_text='Waktu (detik)')
+    fig_z.update_yaxes(title_text='Amplitudo (mm/s²)')
+
+    # Tampilkan grafik akselerasi X, Y, dan Z dengan Plotly Express
+    acceleration_x_chart.plotly_chart(fig_x)
+    acceleration_y_chart.plotly_chart(fig_y)
+    acceleration_z_chart.plotly_chart(fig_z)
+
+    # Hitung FFT untuk ketiga kolom akselerasi
+    fft_x = fft(selected_data_values_x)
+    fft_y = fft(selected_data_values_y)
+    fft_z = fft(selected_data_values_z)
+
+    # Atur sumbu frekuensi untuk FFT
+    N = len(selected_data_values_x)
+    freq = np.fft.fftfreq(N, 6 / 1500)  # 200 adalah frekuensi sampel, ganti sesuai kebutuhan
+
+    # Ambil hanya komponen frekuensi positif
+    positive_freq_indices = np.where(freq >= 0)
+    freq_positive = freq[positive_freq_indices]
+
+    # Buat tiga gambar terpisah untuk FFT akselerasi X, Y, dan Z menggunakan Plotly Express
+    fig_x = px.line(x=freq_positive, y=np.abs(fft_x[positive_freq_indices]), title=f'Domain Frekuensi X - {selected_id}')
+    fig_x.update_xaxes(title_text='Frekuensi (Hz)')
+    fig_x.update_yaxes(title_text='Amplitudo (mm/s2)')
+    fig_x.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_x')
+    fig_x.update_layout(width=600, height=400)
+    acceleration_fft_x_chart.plotly_chart(fig_x)
+
+    fig_y = px.line(x=freq_positive, y=np.abs(fft_y[positive_freq_indices]), title=f'Domain Frekuensi Y - {selected_id}')
+    fig_y.update_xaxes(title_text='Frekuensi (Hz)')
+    fig_y.update_yaxes(title_text='Amplitudo (mm/s2)')
+    fig_y.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_y')
+    fig_y.update_layout(width=600, height=400)
+    acceleration_fft_y_chart.plotly_chart(fig_y)
+
+
+    fig_z = px.line(x=freq_positive, y=np.abs(fft_z[positive_freq_indices]), title=f'Domain Frekuensi Z - {selected_id}')
+    fig_z.update_xaxes(title_text='Frekuensi (Hz)')
+    fig_z.update_yaxes(title_text='Amplitudo (mm/s2)')
+    fig_z.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_z')
+    fig_z.update_layout(width=600, height=400)
+    fig_z.update_yaxes(range=[0, 100])  # Atur batas sumbu y maksimal hingga 100
+    acceleration_fft_z_chart.plotly_chart(fig_z)
+
+    # Tambahkan waktu tidur (delay) agar tampilan data lebih mudah dimengerti
+    st.experimental_rerun()
+    st.sleep(50000)  # Tidur selama 5 detik sebelum pembaruan berikutnya
+
+
