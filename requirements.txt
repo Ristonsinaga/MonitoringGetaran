@@ -1,9 +1,10 @@
-supabase
+from supabase import create_client
 pandas
-streamlit
+streamlit 
+matplotlib.pyplot
+numpy
+scipy.fft
+altair
 plotly.express
-plotly.graph_objs
-plotly.subplots 
-time
 numpy
 plotly.express
