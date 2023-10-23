@@ -1,5 +1,4 @@
 supabase
-create_client
 pandas
 streamlit
 plotly.express
