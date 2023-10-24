@@ -120,15 +120,49 @@ while True:
     peak_y = df["acceleration_y"].max()
     peak_z = df["acceleration_z"].max()
 
+
+    # Hitung nilai peak, RMS, Average, dan Peak to Peak untuk ketiga kolom akselerasi
+    peak_x = df["acceleration_x"].max()
+    rms_x = 0.707 * peak_x
+    average_x = 0.637 * peak_x
+    peak_to_peak_x = df["acceleration_x"].max() - df["acceleration_x"].min()
+
+    peak_y = df["acceleration_y"].max()
+    rms_y = 0.707 * peak_y
+    average_y = 0.637 * peak_y
+    peak_to_peak_y = df["acceleration_y"].max() - df["acceleration_y"].min()
+
+    peak_z = df["acceleration_z"].max()
+    rms_z = 0.707 * peak_z
+    average_z = 0.637 * peak_z
+    peak_to_peak_z = df["acceleration_z"].max() - df["acceleration_z"].min()
+
     # Hitung nilai Hertz (Hz) dari RPM
     rpm = df["rpm"].iloc[-1]  # Ambil nilai RPM terbaru
     hz = rpm / 60
+    hz2 = 2 * hz
+    hz3 = 3 * hz
+    hz4 = 4 * hz
 
-       # Buat dataframe untuk tabel peak dan Hz
+    # Buat DataFrame untuk tabel peak, peak to peak, RMS, dan average
     peak_df = pd.DataFrame({
-        "Parameter": ["Akselerasi X Peak", "Akselerasi Y Peak", "Akselerasi Z Peak", "Frekuensi)"],
-        "Nilai": [peak_x, peak_y, peak_z, hz]
+        "Parameter": ["Axial X", "Axial Y", "Radial Z", "Frekuensi"],
+        "Peak": [f"{peak_x} (mm/s²)", f"{peak_y} (mm/s²)", f"{peak_z} (mm/s²)", f"{hz} Hz"],
+        "Peak to Peak": [f"{peak_to_peak_x} (mm/s²)", f"{peak_to_peak_y} (mm/s²)", f"{peak_to_peak_z} (mm/s²)", f"{hz2} Hz"],
+        "RMS": [f"{rms_x} (mm/s²)", f"{rms_y} (mm/s²)", f"{rms_z} (mm/s²)", f"{hz3} Hz"],
+        "Average": [f"{average_x} (mm/s²)", f"{average_y} (mm/s²)", f"{average_z} (mm/s²)", f"{hz4} Hz"]
     })
+
+    # Menambahkan kolom Status
+    threshold = 2 # Nilai ambang batas
+    peak_df["Status"] = ["Bahaya" if peak_x > threshold else "Aman",
+                         "Bahaya" if peak_y > threshold else "Aman",
+                         "Bahaya" if peak_z > threshold else "Aman",
+                         "Bahaya" if hz > threshold else "Aman"]
+
+
+    # Tampilkan hasil perhitungan dalam tabel
+    table_chart.table(peak_df)
 
 
     # Tampilkan tabel peak dan Hz
