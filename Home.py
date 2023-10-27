@@ -95,6 +95,19 @@ while True:
     acceleration_y = df["acceleration_y"]
     acceleration_z = df["acceleration_z"]
 
+    # Menghitung offset untuk sumbu x
+    offset_x = 0.04  # Nilai yang ingin dijadikan nol
+    acceleration_x = [val - offset_x for val in acceleration_x]
+
+    # Menghitung offset untuk sumbu x
+    offset_y = 0.04  # Nilai yang ingin dijadikan nol
+    acceleration_y = [val - offset_x for val in acceleration_y]
+
+    # Menghitung offset untuk sumbu Z
+    offset_z = 0.97  # Nilai yang ingin dijadikan nol
+    acceleration_z = [val - offset_z for val in acceleration_z]
+
+
     # Buat plotly figure untuk grafik akselerasi
     acceleration_fig = make_subplots(rows=1, cols=1, shared_xaxes=True, vertical_spacing=0.05)
 
@@ -114,11 +127,6 @@ while True:
     rpm_chart.plotly_chart(rpm_fig, use_container_width=True)
     spedometer_chart.plotly_chart(spedometer_fig, use_container_width=True)
     acceleration_chart.plotly_chart(acceleration_fig, use_container_width=True)
-
-    # Hitung nilai puncak dari ketiga sumbu akselerasi
-    peak_x = df["acceleration_x"].max()
-    peak_y = df["acceleration_y"].max()
-    peak_z = df["acceleration_z"].max()
 
 
     # Hitung nilai peak, RMS, Average, dan Peak to Peak untuk ketiga kolom akselerasi
@@ -162,8 +170,4 @@ while True:
 
 
     # Tampilkan hasil perhitungan dalam tabel
-    table_chart.table(peak_df)
-
-
-    # Tampilkan tabel peak dan Hz
     table_chart.table(peak_df)
