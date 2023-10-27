@@ -51,6 +51,25 @@ st.markdown(
 st.write("Selamat datang di Sistem Informasi Monitoring Getaran Mesin. Website ini dirancang untuk memantau dan menganalisis data getaran mesin. Anda dapat melihat data tachometer termasuk akselerasi dalam bentuk grafik Time Domain, dan analisis Domain Frekuensi. Data diambil sebanyak 2100 data, dengan delay 2 ms.")
 
 
+# Tambahkan tombol "Update Data"
+if st.button("Update Data"):
+    supabaseList = supabase.table('maintable').select('*').execute().data
+
+    df = pd.DataFrame()
+    for row in supabaseList:
+        row["created_at"] = row["created_at"].split(".")[0]
+        row["time"] = row["created_at"].split("T")[1]
+        row["date"] = row["created_at"].split("T")[0]
+        row["DateTime"] = row["id"]
+        df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+
+    # Pilih data terakhir secara otomatis
+    selected_id = df['created_at'].max()
+
+    # Informasikan pengguna bahwa data telah diperbarui dan data terakhir telah dipilih
+    st.success("Data telah diperbarui!")
+
+
 while True:
     supabaseList = supabase.table('maintable').select('*').execute().data
 
@@ -65,6 +84,7 @@ while True:
     # Tambahkan elemen input untuk memilih ID
     selected_id = st.selectbox('Pilih Waktu', df['created_at'].unique())
 
+
     # Ambil data acceleration_x, acceleration_y, dan acceleration_z berdasarkan ID yang dipilih
     selected_data_x = df[df['created_at'] == selected_id]['acceleration_x'].values[0]
     selected_data_y = df[df['created_at'] == selected_id]['acceleration_y'].values[0]
@@ -76,9 +96,18 @@ while True:
     selected_data_z = selected_data_z.strip('[]')
 
     # Ganti koma (',') dengan titik desimal ('.') dan pisahkan string menjadi daftar nilai numerik
-    selected_data_values_x = [float(val.replace('j', '.')) for val in selected_data_x.split(',')]
+    selected_data_values_x = [float(val.replace(',', '.')) for val in selected_data_x.split(',')]
     selected_data_values_y = [float(val.replace(',', '.')) for val in selected_data_y.split(',')]
     selected_data_values_z = [float(val.replace(',', '.')) for val in selected_data_z.split(',')]
+
+    # Menghitung offset untuk sumbu Z
+    offset_x = 0.04  # Nilai yang ingin dijadikan nol
+    selected_data_values_x = [val - offset_x for val in selected_data_values_x]
+
+    # Menghitung offset untuk sumbu Z
+    offset_z = 0.97  # Nilai yang ingin dijadikan nol
+    selected_data_values_z = [val - offset_z for val in selected_data_values_z]
+
 
     # Hitung Peak, RMS, Average, dan Peak to Peak untuk ketiga kolom akselerasi
     peak_x = np.max(np.abs(selected_data_values_x))
@@ -240,14 +269,14 @@ while True:
     fig_x = px.line(x=freq_positive, y=np.abs(fft_x[positive_freq_indices]), title=f'Domain Frekuensi X - {selected_id}')
     fig_x.update_xaxes(title_text='Frekuensi (Hz)')
     fig_x.update_yaxes(title_text='Amplitudo (mm/s2)')
-    fig_x.update_traces(line=dict(color='orange', width=0.8), name='FFT acceleration_x')
+    fig_x.update_traces(line=dict(color='blue', width=0.5), name='FFT acceleration_x')
     fig_x.update_layout(width=600, height=400)
     acceleration_fft_x_chart.plotly_chart(fig_x)
 
     fig_y = px.line(x=freq_positive, y=np.abs(fft_y[positive_freq_indices]), title=f'Domain Frekuensi Y - {selected_id}')
     fig_y.update_xaxes(title_text='Frekuensi (Hz)')
     fig_y.update_yaxes(title_text='Amplitudo (mm/s2)')
-    fig_y.update_traces(line=dict(color='orange', width=0.8), name='FFT acceleration_y')
+    fig_y.update_traces(line=dict(color='blue', width=0.5), name='FFT acceleration_y')
     fig_y.update_layout(width=600, height=400)
     acceleration_fft_y_chart.plotly_chart(fig_y)
 
@@ -255,11 +284,7 @@ while True:
     fig_z = px.line(x=freq_positive, y=np.abs(fft_z[positive_freq_indices]), title=f'Domain Frekuensi Z - {selected_id}')
     fig_z.update_xaxes(title_text='Frekuensi (Hz)')
     fig_z.update_yaxes(title_text='Amplitudo (mm/s2)')
-    fig_z.update_traces(line=dict(color='orange', width=0.8), name='FFT acceleration_z')
+    fig_z.update_traces(line=dict(color='blue', width=0.5), name='FFT acceleration_z')
     fig_z.update_layout(width=600, height=400)
-    fig_z.update_yaxes(range=[0, 0.1])  # Atur batas sumbu y maksimal hingga 100
+
     acceleration_fft_z_chart.plotly_chart(fig_z)
-
-
-
-    
