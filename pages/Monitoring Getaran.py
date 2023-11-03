@@ -38,9 +38,12 @@ st.markdown(
         border-radius: 2px;
         display: inline-block;
     }
+    .white-text {
+        color: white;  /* Mengatur warna teks menjadi putih */
+    }
     </style>
-    <div style="text-align: center; font-family: Arial Black; font-size: 50px;">
-    <div class="blue-rectangle">SISTEM INFORMASI MONITORING GETARAN MESIN</div>
+    <div style="text-align: center; font-family: Arial Black; font-size: 48px;">
+    <div class="blue-rectangle white-text">SISTEM INFORMASI MONITORING GETARAN MESIN</div>
     </div>
     """,
     unsafe_allow_html=True
@@ -60,7 +63,7 @@ if st.button("Update Data"):
         row["created_at"] = row["created_at"].split(".")[0]
         row["time"] = row["created_at"].split("T")[1]
         row["date"] = row["created_at"].split("T")[0]
-        row["DateTime"] = row["id"]
+        row["DateTime"] = row["created_at"]
         df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
 
     # Pilih data terakhir secara otomatis
@@ -288,3 +291,7 @@ while True:
     fig_z.update_layout(width=600, height=400)
 
     acceleration_fft_z_chart.plotly_chart(fig_z)
+
+
+
+    
