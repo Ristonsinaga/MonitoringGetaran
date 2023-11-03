@@ -23,19 +23,24 @@ import streamlit as st
 st.set_page_config(page_title="Dashboard", layout='wide', initial_sidebar_state='collapsed')
 
 
-# Buat tampilan judul
 st.markdown(
     """
     <style>
+    body {
+        background-color: white;
+    }
     .blue-rectangle {
-    background-color: maroon;
-    padding: 10px 170px;
-    border-radius: 2px;
-    display: inline-block;
+        background-color: maroon;
+        padding: 10px 170px;
+        border-radius: 2px;
+        display: inline-block;
+    }
+    .white-text {
+        color: white;  /* Mengatur warna teks menjadi putih */
     }
     </style>
-    <div style="text-align: center; font-family: Arial Black; font-size: 50px;">
-    <div class="blue-rectangle">SISTEM INFORMASI MONITORING GETARAN MESIN</div>
+    <div style="text-align: center; font-family: Arial Black; font-size: 48px;">
+    <div class="blue-rectangle white-text">SISTEM INFORMASI MONITORING GETARAN MESIN</div>
     </div>
     """,
     unsafe_allow_html=True
