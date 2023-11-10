@@ -272,14 +272,14 @@ while True:
     fig_x = px.line(x=freq_positive, y=np.abs(fft_x[positive_freq_indices]), title=f'Domain Frekuensi X - {selected_id}')
     fig_x.update_xaxes(title_text='Frekuensi (Hz)')
     fig_x.update_yaxes(title_text='Amplitudo (mm/s2)')
-    fig_x.update_traces(line=dict(color='blue', width=0.5), name='FFT acceleration_x')
+    fig_x.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_x')
     fig_x.update_layout(width=600, height=400)
     acceleration_fft_x_chart.plotly_chart(fig_x)
 
     fig_y = px.line(x=freq_positive, y=np.abs(fft_y[positive_freq_indices]), title=f'Domain Frekuensi Y - {selected_id}')
     fig_y.update_xaxes(title_text='Frekuensi (Hz)')
     fig_y.update_yaxes(title_text='Amplitudo (mm/s2)')
-    fig_y.update_traces(line=dict(color='blue', width=0.5), name='FFT acceleration_y')
+    fig_y.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_y')
     fig_y.update_layout(width=600, height=400)
     acceleration_fft_y_chart.plotly_chart(fig_y)
 
@@ -287,7 +287,7 @@ while True:
     fig_z = px.line(x=freq_positive, y=np.abs(fft_z[positive_freq_indices]), title=f'Domain Frekuensi Z - {selected_id}')
     fig_z.update_xaxes(title_text='Frekuensi (Hz)')
     fig_z.update_yaxes(title_text='Amplitudo (mm/s2)')
-    fig_z.update_traces(line=dict(color='blue', width=0.5), name='FFT acceleration_z')
+    fig_z.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_z')
     fig_z.update_layout(width=600, height=400)
 
     acceleration_fft_z_chart.plotly_chart(fig_z)
