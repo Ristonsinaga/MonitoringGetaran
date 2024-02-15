@@ -4,10 +4,9 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
+from datetime import datetime, timedelta
 import time
-import numpy as np
-from scipy.fft import fft, fftshift
-import plotly.express as px
+
 
 
 # Ganti dengan informasi Supabase Anda
@@ -17,11 +16,8 @@ API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6
 # Inisialisasi klien Supabase
 supabase = create_client(API_URL, API_KEY)
 
-import streamlit as st
-
 # Inisialisasi halaman Streamlit
 st.set_page_config(page_title="Dashboard", layout='wide', initial_sidebar_state='collapsed')
-
 
 st.markdown(
     """
@@ -32,7 +28,7 @@ st.markdown(
     .blue-rectangle {
         background-color: maroon;
         padding: 10px 170px;
-        border-radius: 2px;
+        border-radius: 5px;
         display: inline-block;
     }
     .white-text {
@@ -62,16 +58,24 @@ acceleration_chart = row3.empty()
 row4 = st.columns(1)
 table_chart = row4[0].empty()
 
-
 while True:
     supabaseList = supabase.table('RPM').select('*').execute().data
 
     df = pd.DataFrame()
     for row in supabaseList:
-        row["created_at"] = row["created_at"].split(".")[0]
-        row["time"] = row["created_at"].split("T")[1]
-        row["date"] = row["created_at"].split("T")[0]
-        row["DateTime"] = row["id"]  # ganti dengan created_at atau kolom waktu yang sesuai
+        # Parse "created_at" with fractional seconds
+        created_at_datetime = datetime.strptime(row["created_at"].split(".")[0], "%Y-%m-%dT%H:%M:%S")
+        
+        # Add 7 hours to the timestamp
+        adjusted_datetime = created_at_datetime + timedelta(hours=7)
+
+        # Update the row with adjusted date and time
+        row["created_at"] = adjusted_datetime.strftime("%Y-%m-%dT%H:%M:%S")
+        row["time"] = adjusted_datetime.strftime("%H:%M:%S")
+        row["date"] = adjusted_datetime.strftime("%Y-%m-%d")
+        row["DateTime"] = adjusted_datetime.strftime("%Y-%m-%dT%H:%M:%S")  # You can change this line accordingly
+
+        # Concatenate the row to the DataFrame
         df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
 
     # Mengurutkan dataframe berdasarkan kolom "DateTime"
@@ -82,11 +86,16 @@ while True:
     rpm_fig.update_xaxes(title_text="Waktu")
     rpm_fig.update_yaxes(title_text="RPM")
 
+    # Tambahkan trace untuk menampilkan timestamp di bawah grafik RPM
+    rpm_fig.add_trace(go.Scatter(x=df["DateTime"], y=[0] * len(df), mode='markers+text',
+                                text=df["time"], textposition="bottom center", marker=dict(size=0),
+                                showlegend=False))
+
     # Buat tampilan spidometer dengan ukuran kustom
     spedometer_fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=df["rpm"].iloc[-1],  # Nilai terbaru dari RPM
-        title={'text': "Kecepatan (RPM)"},
+        title={'text': f"Kecepatan (RPM) - {df['time'].iloc[-1]}"},  # Add timestamp to the title
         gauge={'axis': {'range': [min(df["rpm"]), max(df["rpm"])]},
                'steps': [{'range': [min(df["rpm"]), max(df["rpm"]) / 2], 'color': "lightgray"},
                          {'range': [max(df["rpm"]) / 2, max(df["rpm"])], 'color': "gray"}],
@@ -112,7 +121,6 @@ while True:
     offset_z = 0.97  # Nilai yang ingin dijadikan nol
     acceleration_z = [val - offset_z for val in acceleration_z]
 
-
     # Buat plotly figure untuk grafik akselerasi
     acceleration_fig = make_subplots(rows=1, cols=1, shared_xaxes=True, vertical_spacing=0.05)
 
@@ -127,12 +135,6 @@ while True:
         yaxis_title="Nilai Akselerasi",
         showlegend=True
     )
-
-    # Tampilkan grafik RPM, spedometer, dan akselerometer di tampilan Streamlit
-    rpm_chart.plotly_chart(rpm_fig, use_container_width=True)
-    spedometer_chart.plotly_chart(spedometer_fig, use_container_width=True)
-    acceleration_chart.plotly_chart(acceleration_fig, use_container_width=True)
-
 
     # Hitung nilai peak, RMS, Average, dan Peak to Peak untuk ketiga kolom akselerasi
     peak_x = df["acceleration_x"].max()
@@ -167,12 +169,19 @@ while True:
     })
 
     # Menambahkan kolom Status
-    threshold = 2 # Nilai ambang batas
+    threshold = 2  # Nilai ambang batas
     peak_df["Status"] = ["Bahaya" if peak_x > threshold else "Aman",
                          "Bahaya" if peak_y > threshold else "Aman",
                          "Bahaya" if peak_z > threshold else "Aman",
                          "Bahaya" if hz > threshold else "Aman"]
 
+    # Tampilkan grafik RPM, spedometer, dan akselerometer di tampilan Streamlit
+    rpm_chart.plotly_chart(rpm_fig, use_container_width=True)
+    spedometer_chart.plotly_chart(spedometer_fig, use_container_width=True)
+    acceleration_chart.plotly_chart(acceleration_fig, use_container_width=True)
 
     # Tampilkan hasil perhitungan dalam tabel
     table_chart.table(peak_df)
+
+    # Tunggu 5 detik sebelum memperbarui data (sesuaikan dengan kebutuhan)
+    time.sleep(5)
