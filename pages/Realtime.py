@@ -8,8 +8,7 @@ import altair as alt
 import plotly.express as px
 import numpy as np
 import plotly.express as px
-
-
+from datetime import timedelta
 
 # Ganti dengan informasi Supabase Anda
 API_URL = 'https://tytohrcddnmmkqazxhuc.supabase.co'
@@ -22,8 +21,6 @@ import streamlit as st
 
 # Inisialisasi halaman Streamlit
 st.set_page_config(page_title="Dashboard", layout='wide', initial_sidebar_state='collapsed')
-
-# ...
 
 # Buat tampilan judul dengan latar belakang putih
 st.markdown(
@@ -49,29 +46,43 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
 # Tambahkan teks tentang kegunaan web
 st.write("Selamat datang di Sistem Informasi Monitoring Getaran Mesin. Website ini dirancang untuk memantau dan menganalisis data getaran mesin. Anda dapat melihat data tachometer termasuk akselerasi dalam bentuk grafik Time Domain, dan analisis Domain Frekuensi. Data diambil sebanyak 2100 data, dengan delay 2 ms.")
 
 @st.cache_data
 def load_data_from_supabase():
     supabaseList = supabase.table('maintable').select('*').execute().data
-    df = pd.DataFrame()
-    for row in supabaseList:
-        row["created_at"] = row["created_at"].split(".")[0]
-        row["time"] = row["created_at"].split("T")[1]
-        row["date"] = row["created_at"].split("T")[0]
-        row["DateTime"] = row["id"]
-        df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+
+    # Check if the data is empty
+    if not supabaseList:
+        st.warning("DATA EMPTY")
+        return pd.DataFrame()  # Return an empty DataFrame
+
+    df = pd.DataFrame(supabaseList)
+
+    # Convert created_at to datetime
+    df['created_at'] = pd.to_datetime(df['created_at'].str.split('.').str[0])
+
+    # Add 7 hours to created_at
+    df['created_at'] += pd.Timedelta(hours=7)
+
+    # Create additional columns
+    df['time'] = df['created_at'].dt.strftime('%H:%M:%S')
+    df['date'] = df['created_at'].dt.strftime('%Y-%m-%d')
+    df['DateTime'] = df['id']
+
+    # Sort DataFrame by created_at column
+    df.sort_values(by='created_at', inplace=True)
+
     return df
 
-# ...
-
 df = load_data_from_supabase()
+
 
 # Tambahkan elemen input untuk memilih ID
 selected_id = st.selectbox('Pilih Waktu', df['created_at'].unique())
 st.session_state.selected_id = selected_id
+
 
 if 'selected_id' in st.session_state:
     selected_id = st.session_state.selected_id
@@ -92,12 +103,15 @@ if 'selected_id' in st.session_state:
     selected_data_values_z = [float(val.replace(',', '.')) for val in selected_data_z.split(',')]
 
     # Menghitung offset untuk sumbu Z
-    offset_x = 0.04  # Nilai yang ingin dijadikan nol
+    offset_x = 0.02  # Nilai yang ingin dijadikan nol
     selected_data_values_x = [val - offset_x for val in selected_data_values_x]
 
+    offset_y = 0.01  # Nilai yang ingin dijadikan nol
+    selected_data_values_y = [val - offset_y for val in selected_data_values_y]
+
     # Menghitung offset untuk sumbu Z
-    offset_z = 0.97  # Nilai yang ingin dijadikan nol
-    selected_data_values_z = [val - offset_z for val in selected_data_values_z]
+    offset_z = 21.48  # Nilai yang ingin dijadikan nol
+    selected_data_values_z = [(val *1638.4)/819.2 - offset_z for val in selected_data_values_z]
 
 
     # Hitung Peak, RMS, Average, dan Peak to Peak untuk ketiga kolom akselerasi
@@ -173,10 +187,7 @@ if 'selected_id' in st.session_state:
     with col2:
         st.write("Tabel Akselerasi:")
         st.write(df_acceleration.to_html(escape=False), unsafe_allow_html=True)
-
-
-
-
+        
     # Buat tempat kosong awal untuk grafik
     spedometer_chart = st.empty()
     row1, row2, row3 = st.columns([3, 3, 3])
@@ -193,7 +204,7 @@ if 'selected_id' in st.session_state:
 
 
     # Waktu antara setiap data dalam milidetik (ms)
-    time_step_ms = 3
+    time_step_ms = 2
 
     # Jumlah data
     num_data_points = 1500
@@ -214,25 +225,43 @@ if 'selected_id' in st.session_state:
     df = pd.DataFrame(data)
 
     # Membuat grafik akselerasi X, Y, dan Z dalam domain waktu dengan Plotly Express
-    fig_x = px.line(df, x='Time (s)', y='Akselerasi X', title=f'Time Domain {selected_id}', width=600, height=400)
+    fig_x = px.line(df, x='Time (s)', y='Akselerasi X', title=f'Domain Waktu X (Radial) {selected_id}', width=600, height=400)
     fig_x.update_traces(line=dict(color='blue', width=0.6), name='Akselerasi X')
     fig_x.update_xaxes(title_text='Waktu (detik)')
     fig_x.update_yaxes(title_text='Amplitudo (mm/s²)')
 
 
-    fig_y = px.line(df, x='Time (s)', y='Akselerasi Y', title=f'Time Domain {selected_id}', width=600, height=400)
+    fig_y = px.line(df, x='Time (s)', y='Akselerasi Y', title=f'Domain Waktu Y (Axial) {selected_id}', width=600, height=400)
     fig_y.update_traces(line=dict(color='blue', width=0.6), name='Akselerasi Y')
     fig_y.update_xaxes(title_text='Waktu (detik)')
     fig_y.update_yaxes(title_text='Amplitudo (mm/s²)')
 
+
     # Konversi data ke DataFrame
+    df_acceleration_x = pd.DataFrame({'Time (s)': time_values, 'Akselerasi X': selected_data_values_x})
+    df_acceleration_y = pd.DataFrame({'Time (s)': time_values, 'Akselerasi Y': selected_data_values_y})
     df_acceleration_z = pd.DataFrame({'Time (s)': time_values, 'Akselerasi Z': selected_data_values_z})
 
-    # Menampilkan tabel dalam aplikasi Streamlit
-    st.write("Tabel Akselerasi Z")
-    st.dataframe(df_acceleration_z)
+    # Layout kolom Streamlit
+    col1, col2, col3 = st.columns(3)
 
-    fig_z = px.line(df, x='Time (s)', y='Akselerasi Z', title=f'Time Domain {selected_id}', width=600, height=400)
+    # Menampilkan tabel akselerasi X di kolom pertama (kiri)
+    with col1:
+        st.write("Tabel Akselerasi X")
+        st.dataframe(df_acceleration_x)
+
+    # Menampilkan tabel akselerasi Y di kolom kedua (tengah)
+    with col2:
+        st.write("Tabel Akselerasi Y")
+        st.dataframe(df_acceleration_y)
+
+    # Menampilkan tabel akselerasi Z di kolom ketiga (kanan)
+    with col3:
+        st.write("Tabel Akselerasi Z")
+        st.dataframe(df_acceleration_z)
+
+
+    fig_z = px.line(df, x='Time (s)', y='Akselerasi Z', title=f'Domain Waktu Z (Radial) {selected_id}', width=600, height=400)
     fig_z.update_traces(line=dict(color='blue', width=0.6), name='Akselerasi Z')
     fig_z.update_xaxes(title_text='Waktu (detik)')
     fig_z.update_yaxes(title_text='Amplitudo (mm/s²)')
@@ -250,36 +279,31 @@ if 'selected_id' in st.session_state:
 
     # Atur sumbu frekuensi untuk FFT
     N = len(selected_data_values_z)
-    freq = np.fft.fftfreq(N, 4.5 / 1500)  # 200 adalah frekuensi sampel, ganti sesuai kebutuhan
+    freq = np.fft.fftfreq(N, 3 / 1500)  # frekuensi sampel, ganti sesuai kebutuhan
 
     # Ambil hanya komponen frekuensi positif
     positive_freq_indices = np.where((freq >= 0)) 
     freq_positive = freq[positive_freq_indices]
 
     # Buat tiga gambar terpisah untuk FFT akselerasi X, Y, dan Z menggunakan Plotly Express
-    fig_x = px.line(x=freq_positive, y=np.abs(fft_x[positive_freq_indices]), title=f'Domain Frekuensi X - {selected_id}')
+    fig_x = px.line(x=freq_positive, y=np.abs(fft_x[positive_freq_indices]), title=f'Domain Frekuensi X (Radial) - {selected_id}')
     fig_x.update_xaxes(title_text='Frekuensi (Hz)')
-    fig_x.update_yaxes(title_text='Amplitudo (mm/s2)')
-    fig_x.update_traces(line=dict(color='blue', width=0.8), name='FFT acceleration_x')
+    fig_x.update_yaxes(title_text='Amplitudo (mm/s²)')
+    fig_x.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_x')
     fig_x.update_layout(width=600, height=400)
     acceleration_fft_x_chart.plotly_chart(fig_x)
 
-    fig_y = px.line(x=freq_positive, y=np.abs(fft_y[positive_freq_indices]), title=f'Domain Frekuensi Y - {selected_id}')
+    fig_y = px.line(x=freq_positive, y=np.abs(fft_y[positive_freq_indices]), title=f'Domain Frekuensi Y (axial)- {selected_id}')
     fig_y.update_xaxes(title_text='Frekuensi (Hz)')
-    fig_y.update_yaxes(title_text='Amplitudo (mm/s2)')
-    fig_y.update_traces(line=dict(color='blue', width=0.8), name='FFT acceleration_y')
+    fig_y.update_yaxes(title_text='Amplitudo (mm/s²)')
+    fig_y.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_y')
     fig_y.update_layout(width=600, height=400)
     acceleration_fft_y_chart.plotly_chart(fig_y)
 
 
-    fig_z = px.line(x=freq_positive, y=np.abs(fft_z[positive_freq_indices]), title=f'Domain Frekuensi Z - {selected_id}')
+    fig_z = px.line(x=freq_positive, y=np.abs(fft_z[positive_freq_indices]), title=f'Domain Frekuensi Z (Radial) - {selected_id}')
     fig_z.update_xaxes(title_text='Frekuensi (Hz)')
-    fig_z.update_yaxes(title_text='Amplitudo (mm/s2)')
+    fig_z.update_yaxes(title_text='Amplitudo (mm/s²)')
     fig_z.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_z')
     fig_z.update_layout(width=600, height=400)
-
     acceleration_fft_z_chart.plotly_chart(fig_z)
-
-
-
-    
