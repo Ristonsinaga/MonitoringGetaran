@@ -103,13 +103,18 @@ while True:
     selected_data_values_y = [float(val.replace(',', '.')) for val in selected_data_y.split(',')]
     selected_data_values_z = [float(val.replace(',', '.')) for val in selected_data_z.split(',')]
 
-    # Menghitung offset untuk sumbu Z
-    offset_x = 0.04  # Nilai yang ingin dijadikan nol
-    selected_data_values_x = [val - offset_x for val in selected_data_values_x]
 
     # Menghitung offset untuk sumbu Z
-    offset_z = 0.97  # Nilai yang ingin dijadikan nol
-    selected_data_values_z = [val - offset_z for val in selected_data_values_z]
+    offset_x = 0.02  # Nilai yang ingin dijadikan nol
+    selected_data_values_x = [val - offset_x for val in selected_data_values_x]
+
+    offset_y = 0.01  # Nilai yang ingin dijadikan nol
+    selected_data_values_y = [val - offset_y for val in selected_data_values_y]
+
+    # Menghitung offset untuk sumbu Z
+    offset_z = 21.48  # Nilai yang ingin dijadikan nol
+    selected_data_values_z = [(val *1638.4)/819.2 - offset_z for val in selected_data_values_z]
+
 
 
     # Hitung Peak, RMS, Average, dan Peak to Peak untuk ketiga kolom akselerasi
@@ -186,9 +191,6 @@ while True:
         st.write("Tabel Akselerasi:")
         st.write(df_acceleration.to_html(escape=False), unsafe_allow_html=True)
 
-
-
-
     # Buat tempat kosong awal untuk grafik
     spedometer_chart = st.empty()
     row1, row2, row3 = st.columns([3, 3, 3])
@@ -240,9 +242,29 @@ while True:
     # Konversi data ke DataFrame
     df_acceleration_z = pd.DataFrame({'Time (s)': time_values, 'Akselerasi Z': selected_data_values_z})
 
-    # Menampilkan tabel dalam aplikasi Streamlit
-    st.write("Tabel Akselerasi Z")
-    st.dataframe(df_acceleration_z)
+    # Konversi data ke DataFrame
+    df_acceleration_x = pd.DataFrame({'Time (s)': time_values, 'Akselerasi X': selected_data_values_x})
+    df_acceleration_y = pd.DataFrame({'Time (s)': time_values, 'Akselerasi Y': selected_data_values_y})
+    df_acceleration_z = pd.DataFrame({'Time (s)': time_values, 'Akselerasi Z': selected_data_values_z})
+
+    # Layout kolom Streamlit
+    col1, col2, col3 = st.columns(3)
+
+    # Menampilkan tabel akselerasi X di kolom pertama (kiri)
+    with col1:
+        st.write("Tabel Akselerasi X")
+        st.dataframe(df_acceleration_x)
+
+    # Menampilkan tabel akselerasi Y di kolom kedua (tengah)
+    with col2:
+        st.write("Tabel Akselerasi Y")
+        st.dataframe(df_acceleration_y)
+
+    # Menampilkan tabel akselerasi Z di kolom ketiga (kanan)
+    with col3:
+        st.write("Tabel Akselerasi Z")
+        st.dataframe(df_acceleration_z)
+
 
     fig_z = px.line(df, x='Time (s)', y='Akselerasi Z', title=f'Time Domain {selected_id}', width=600, height=400)
     fig_z.update_traces(line=dict(color='blue', width=0.6), name='Akselerasi Z')
@@ -272,14 +294,14 @@ while True:
     fig_x = px.line(x=freq_positive, y=np.abs(fft_x[positive_freq_indices]), title=f'Domain Frekuensi X - {selected_id}')
     fig_x.update_xaxes(title_text='Frekuensi (Hz)')
     fig_x.update_yaxes(title_text='Amplitudo (mm/s2)')
-    fig_x.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_x')
+    fig_x.update_traces(line=dict(color='blue', width=0.5), name='FFT acceleration_x')
     fig_x.update_layout(width=600, height=400)
     acceleration_fft_x_chart.plotly_chart(fig_x)
 
     fig_y = px.line(x=freq_positive, y=np.abs(fft_y[positive_freq_indices]), title=f'Domain Frekuensi Y - {selected_id}')
     fig_y.update_xaxes(title_text='Frekuensi (Hz)')
     fig_y.update_yaxes(title_text='Amplitudo (mm/s2)')
-    fig_y.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_y')
+    fig_y.update_traces(line=dict(color='blue', width=0.5), name='FFT acceleration_y')
     fig_y.update_layout(width=600, height=400)
     acceleration_fft_y_chart.plotly_chart(fig_y)
 
@@ -287,9 +309,8 @@ while True:
     fig_z = px.line(x=freq_positive, y=np.abs(fft_z[positive_freq_indices]), title=f'Domain Frekuensi Z - {selected_id}')
     fig_z.update_xaxes(title_text='Frekuensi (Hz)')
     fig_z.update_yaxes(title_text='Amplitudo (mm/s2)')
-    fig_z.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_z')
+    fig_z.update_traces(line=dict(color='blue', width=0.5), name='FFT acceleration_z')
     fig_z.update_layout(width=600, height=400)
-
     acceleration_fft_z_chart.plotly_chart(fig_z)
 
 
