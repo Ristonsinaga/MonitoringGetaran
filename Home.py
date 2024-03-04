@@ -43,7 +43,7 @@ st.markdown(
 )
 
 # Tambahkan teks tentang kegunaan web
-st.write("Selamat datang di Sistem Informasi Monitoring Getaran Mesin. Website ini dirancang untuk memantau dan menganalisis data getaran mesin. Anda dapat melihat data tachometer termasuk akselerasi dalam bentuk grafik Time Domain, dan analisis Domain Frekuensi. Data diambil sebanyak 2000 data, dengan delay 2 ms.")
+st.write("Selamat datang di Sistem Informasi Monitoring Getaran Mesin. Website ini dirancang untuk memantau dan menganalisis data getaran mesin. Anda dapat melihat data tachometer termasuk akselerasi dalam bentuk grafik Time Domain, dan analisis Domain Frekuensi. Data diambil sebanyak 1500 data, dengan delay 2 ms.")
 
 # Buat tempat kosong untuk grafik
 row1, row2, row3 = st.columns(3)
@@ -130,9 +130,9 @@ while True:
 
     # Atur tampilan grafik akselerasi
     acceleration_fig.update_layout(
-        title="Grafik Akselerasi",
+        title="Grafik Kecepatan Getaran (Vrms)",
         xaxis_title="Waktu",
-        yaxis_title="Nilai Akselerasi",
+        yaxis_title="Vrms (mm/s)",
         showlegend=True
     )
 
