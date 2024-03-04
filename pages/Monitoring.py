@@ -6,8 +6,6 @@ import numpy as np
 from scipy.fft import fft, fftshift
 import altair as alt
 import plotly.express as px
-import numpy as np
-import plotly.express as px
 from datetime import timedelta
 
 # Ganti dengan informasi Supabase Anda
@@ -47,7 +45,7 @@ st.markdown(
 )
 
 # Tambahkan teks tentang kegunaan web
-st.write("Selamat datang di Sistem Informasi Monitoring Getaran Mesin. Website ini dirancang untuk memantau dan menganalisis data getaran mesin. Anda dapat melihat data tachometer termasuk akselerasi dalam bentuk grafik Time Domain, dan analisis Domain Frekuensi. Data diambil sebanyak 2100 data, dengan delay 2 ms.")
+st.write("Selamat datang di Sistem Informasi Monitoring Getaran Mesin. Website ini dirancang untuk memantau dan menganalisis data getaran mesin. Anda dapat melihat data tachometer termasuk akselerasi dalam bentuk grafik Time Domain, dan analisis Domain Frekuensi. Data diambil sebanyak 1500 data, dengan delay 2 ms.")
 
 @st.cache_data
 def load_data_from_supabase():
@@ -288,14 +286,14 @@ if 'selected_id' in st.session_state:
     # Buat tiga gambar terpisah untuk FFT akselerasi X, Y, dan Z menggunakan Plotly Express
     fig_x = px.line(x=freq_positive, y=np.abs(fft_x[positive_freq_indices]), title=f'Domain Frekuensi X (Radial) - {selected_id}')
     fig_x.update_xaxes(title_text='Frekuensi (Hz)')
-    fig_x.update_yaxes(title_text='Amplitudo (mm/s²)')
+    fig_x.update_yaxes(title_text='Magnitudo (mm/s²)')
     fig_x.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_x')
     fig_x.update_layout(width=600, height=400)
     acceleration_fft_x_chart.plotly_chart(fig_x)
 
     fig_y = px.line(x=freq_positive, y=np.abs(fft_y[positive_freq_indices]), title=f'Domain Frekuensi Y (axial)- {selected_id}')
     fig_y.update_xaxes(title_text='Frekuensi (Hz)')
-    fig_y.update_yaxes(title_text='Amplitudo (mm/s²)')
+    fig_y.update_yaxes(title_text='Magnitudo (mm/s²)')
     fig_y.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_y')
     fig_y.update_layout(width=600, height=400)
     acceleration_fft_y_chart.plotly_chart(fig_y)
@@ -303,7 +301,7 @@ if 'selected_id' in st.session_state:
 
     fig_z = px.line(x=freq_positive, y=np.abs(fft_z[positive_freq_indices]), title=f'Domain Frekuensi Z (Radial) - {selected_id}')
     fig_z.update_xaxes(title_text='Frekuensi (Hz)')
-    fig_z.update_yaxes(title_text='Amplitudo (mm/s²)')
+    fig_z.update_yaxes(title_text='Magnitudo (mm/s²)')
     fig_z.update_traces(line=dict(color='blue', width=1), name='FFT acceleration_z')
     fig_z.update_layout(width=600, height=400)
     acceleration_fft_z_chart.plotly_chart(fig_z)
