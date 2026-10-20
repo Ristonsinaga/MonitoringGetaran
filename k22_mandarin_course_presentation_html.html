@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandarin Language Course Plan 中文課程計畫 日月光K22</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                            glow: '#00f2fe'
+                        },
+                        darkbg: '#0b0f19',
+                        cardbg: 'rgba(17, 24, 39, 0.75)'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            overflow: hidden;
+        }
+
+        /* Glassmorphism card styling */
+        .glass-card {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card-glow {
+            position: relative;
+        }
+        .glass-card-glow::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: -1px; right: -1px; bottom: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(0,242,254,0.4), rgba(59,130,246,0.1), rgba(0,0,0,0));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        /* Background grid animation */
+        .tech-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        /* Slide Animation Transitions */
+        .slide-content {
+            display: none;
+            opacity: 0;
+            transform: translateY(15px) scale(0.99);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .slide-content.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Custom Scrollbar for inner elements */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0284c7;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #38bdf8;
+        }
+
+        /* Flashcard Flip Effect */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between tech-grid bg-darkbg text-gray-100 select-none overflow-hidden">
+
+    <!-- TOP HEADER / NAV BAR -->
+    <header class="h-16 border-b border-gray-800/80 px-6 flex items-center justify-between z-20 glass-card">
+        <div class="flex items-center gap-3">
+            <div class="h-9 w-9 rounded-lg bg-gradient-to-tr from-brand-600 to-cyan-400 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-cyan-500/20">
+                ASE
+            </div>
+            <div>
+                <h1 class="font-bold text-base tracking-wide text-white flex items-center gap-2">
+                    Mandarin Language Course Plan
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30">中文課程計畫 日月光K22</span>
+                </h1>
+            </div>
+        </div>
+
+        <!-- Slide Selector Dropdown & Fullscreen -->
+        <div class="flex items-center gap-4">
+            <div class="relative hidden sm:block">
+                <select id="slideSelect" onchange="goToSlide(parseInt(this.value))" class="bg-gray-900/90 border border-gray-700 text-gray-200 text-xs rounded-lg px-3 py-2 pr-8 focus:ring-1 focus:ring-brand-400 outline-none cursor-pointer">
+                    <option value="0">Slide 1: Mandarin Language Course Plan 中文課程計畫 日月光K22</option>
+                    <option value="1">Slide 2: 學習計畫</option>
+                    <option value="2">Slide 3: 中文培訓課程大綱</option>
+                    <option value="3">Slide 4: 華語學習計畫與課程大綱</option>
+                    <option value="4">Slide 5: 例如編號 (No.) | 繁體 | 英文 (English) | 意思</option>
+                </select>
+            </div>
+
+            <button onclick="toggleFullscreen()" title="全螢幕模式" class="p-2 rounded-lg bg-gray-800/80 hover:bg-gray-700 text-gray-300 hover:text-white transition">
+                <i class="fa-solid fa-expand text-sm"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN SLIDE CONTAINER -->
+    <main class="flex-1 relative w-full h-[calc(100vh-8rem)] p-4 sm:p-6 md:p-8 flex items-center justify-center overflow-hidden">
+        
+        <!-- Ambient Glowing Background Bubbles -->
+        <div class="absolute top-1/4 left-10 w-72 h-72 bg-brand-500/10 rounded-full filter blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-cyan-500/10 rounded-full filter blur-3xl pointer-events-none"></div>
+
+        <!-- ================= SLIDE 1: COVER ================= -->
+        <section id="slide-0" class="slide-content active w-full max-w-5xl h-full flex-col justify-center items-center text-center z-10">
+            <div class="glass-card glass-card-glow p-8 sm:p-12 md:p-16 rounded-3xl w-full flex flex-col items-center justify-center border border-gray-700/50 relative overflow-hidden">
+                <div class="absolute -top-12 -right-12 w-40 h-40 bg-brand-500/20 rounded-full blur-2xl"></div>
+                
+                <div class="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-500/10 border border-brand-400/30 text-brand-400 text-sm font-medium">
+                    <i class="fa-solid fa-microchip"></i> ASE K22
+                </div>
+
+                <h1 class="text-3xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-brand-400 tracking-tight mb-4">
+                    Mandarin Language Course Plan
+                </h1>
+                <h2 class="text-3xl sm:text-5xl font-extrabold text-brand-400 mb-8 tracking-wide">
+                    中文課程計畫
+                </h2>
+
+                <div class="text-2xl sm:text-3xl font-bold text-gray-200 tracking-wider mb-10 px-6 py-2 bg-gray-900/60 rounded-xl border border-gray-800">
+                    日月光K22
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button onclick="nextSlide()" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-brand-600 to-cyan-500 hover:from-brand-500 hover:to-cyan-400 text-white font-semibold shadow-lg shadow-cyan-500/25 transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2">
+                        <span>開始簡報</span>
+                        <i class="fa-solid fa-arrow-right text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SLIDE 2: LEARNING PLAN ================= -->
+        <section id="slide-1" class="slide-content w-full max-w-5xl h-full flex-col justify-center z-10">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-white flex items-center gap-3">
+                    <i class="fa-solid fa-bullseye text-brand-400"></i> 學習計畫
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+                <!-- Item 1 -->
+                <div class="glass-card p-6 rounded-2xl border border-gray-800 hover:border-brand-500/40 transition duration-300 flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-brand-500/20 flex items-center justify-center text-brand-400 text-xl mb-4 border border-brand-500/30">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </div>
+                        <p class="text-gray-200 text-base leading-relaxed">
+                            參加 K22 課程，每週 2 天，每天 2 小時 (每週共計 4 小時)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="glass-card p-6 rounded-2xl border border-gray-800 hover:border-brand-500/40 transition duration-300 flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl mb-4 border border-cyan-500/30">
+                            <i class="fa-solid fa-comments"></i>
+                        </div>
+                        <p class="text-gray-200 text-base leading-relaxed">
+                            建立 Gotouch 群組，並分享學習內容、單字詞彙與相關教材
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Item 3 -->
+                <div class="glass-card p-6 rounded-2xl border border-gray-800 hover:border-brand-500/40 transition duration-300 flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl mb-4 border border-emerald-500/30">
+                            <i class="fa-solid fa-user-check"></i>
+                        </div>
+                        <p class="text-gray-200 text-base leading-relaxed">
+                            與主管進行學習進度面試/訪談 (目標：能夠運用所學主題進行對話)
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SLIDE 3: CURRICULUM OUTLINE ================= -->
+        <section id="slide-2" class="slide-content w-full max-w-5xl h-full flex-col justify-center z-10">
+            <div class="mb-6">
+                <h2 class="text-3xl font-bold text-white flex items-center gap-3">
+                    <i class="fa-solid fa-book-open text-brand-400"></i> 中文培訓課程大綱
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+                <!-- Part 1 -->
+                <div class="glass-card p-6 rounded-2xl border border-gray-800 relative overflow-hidden group hover:border-brand-500/50 transition">
+                    <span class="text-xs font-bold text-brand-400 px-2.5 py-1 bg-brand-500/10 rounded-md border border-brand-500/20">第一部分</span>
+                    <h3 class="text-lg font-bold text-white mt-3 mb-4">發音與語音基礎</h3>
+                    <ul class="space-y-3 text-xs text-gray-200">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-brand-400 mt-0.5"></i>
+                            <span>學習基本發音與正確口型。</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-brand-400 mt-0.5"></i>
+                            <span>發音對比：練習較難發音的聲母 (例如 zh, ch, sh, r 與 z, c, s)</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-brand-400 mt-0.5"></i>
+                            <span>四聲聲調練習</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Part 2 -->
+                <div class="glass-card p-6 rounded-2xl border border-gray-800 relative overflow-hidden group hover:border-cyan-500/50 transition">
+                    <span class="text-xs font-bold text-cyan-400 px-2.5 py-1 bg-cyan-500/10 rounded-md border border-cyan-500/20">第二部分</span>
+                    <h3 class="text-lg font-bold text-white mt-3 mb-4">日常生活會話</h3>
+                    <ul class="space-y-2 text-xs text-gray-200">
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-angle-right text-cyan-400 mt-0.5"></i> <span>說明姓名、國籍與背景。</span></li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-angle-right text-cyan-400 mt-0.5"></i> <span>同事問候：日常工作打招呼。</span></li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-angle-right text-cyan-400 mt-0.5"></i> <span>用餐用語：點餐、調整冰塊/甜度，以及外帶表達。</span></li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-angle-right text-cyan-400 mt-0.5"></i> <span>日常寒暄：常見問候語 (例如：問候近況或「吃飽了嗎?)</span></li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-angle-right text-cyan-400 mt-0.5"></i> <span>工作地點：說明工作地點 (日月光/廠房與站別)</span></li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-angle-right text-cyan-400 mt-0.5"></i> <span>工作內容：簡單說明每日工作項目。</span></li>
+                    </ul>
+                </div>
+
+                <!-- Part 3 -->
+                <div class="glass-card p-6 rounded-2xl border border-gray-800 relative overflow-hidden group hover:border-emerald-500/50 transition">
+                    <span class="text-xs font-bold text-emerald-400 px-2.5 py-1 bg-emerald-500/10 rounded-md border border-emerald-500/20">第三部分</span>
+                    <h3 class="text-lg font-bold text-white mt-3 mb-4">廠區實用中文</h3>
+                    <ul class="space-y-2 text-xs text-gray-200">
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-gear text-emerald-400 mt-0.5"></i> <span>工作溝通：與組長、隊長/同事基本簡短對話。</span></li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-gear text-emerald-400 mt-0.5"></i> <span>機台名稱：學習站別設備名稱與常用術語。</span></li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-gear text-emerald-400 mt-0.5"></i> <span>工具與零件：認識單調工具/機台與機台零件。</span></li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-gear text-emerald-400 mt-0.5"></i> <span>無塵室環境：了解無塵室規範、個人防護裝備、安全規範與日常作業。</span></li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-gear text-emerald-400 mt-0.5"></i> <span>電話接聽與轉接：接聽內部電話，並說明同仁不在位置/在崗位上</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SLIDE 4: 16 LESSON SYLLABUS TABLE ================= -->
+        <section id="slide-3" class="slide-content w-full max-w-5xl h-full flex-col justify-start z-10 pt-2">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">華語學習計畫與課程大綱</h2>
+                </div>
+
+                <!-- Search -->
+                <div class="relative w-full sm:w-64">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                    <input type="text" id="lessonSearch" onkeyup="filterLessons()" placeholder="搜尋關鍵字..." 
+                        class="w-full pl-9 pr-3 py-1.5 bg-gray-900/90 border border-gray-700 rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-400">
+                </div>
+            </div>
+
+            <!-- Table Wrapper -->
+            <div class="glass-card rounded-2xl border border-gray-800 overflow-hidden flex-1 max-h-[60vh] flex flex-col">
+                <div class="overflow-y-auto flex-1">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-gray-900/90 text-brand-400 sticky top-0 z-10 border-b border-gray-800">
+                            <tr>
+                                <th class="p-3 font-semibold text-center w-20">編號</th>
+                                <th class="p-3 font-semibold w-1/4">英文主題</th>
+                                <th class="p-3 font-semibold w-1/4">中文主題</th>
+                                <th class="p-3 font-semibold">內容對應</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lessonTableBody" class="divide-y divide-gray-800/60 text-gray-300">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SLIDE 5: VOCABULARY FLASHCARDS ================= -->
+        <section id="slide-4" class="slide-content w-full max-w-5xl h-full flex-col justify-start z-10 pt-2">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-clone text-brand-400"></i> 例如編號 (No.) | 繁體 | 英文 (English) | 意思
+                    </h2>
+                </div>
+                <div class="text-xs text-gray-400 mt-1 sm:mt-0">
+                    點擊卡片翻面
+                </div>
+            </div>
+
+            <!-- Flashcard UI Container -->
+            <div class="flex-1 flex flex-col items-center justify-center w-full max-w-2xl mx-auto">
+                <div onclick="flipCard()" class="w-full h-64 sm:h-72 perspective-1000 cursor-pointer">
+                    <div id="flashcardInner" class="relative w-full h-full duration-500 transform-style-3d glass-card glass-card-glow rounded-3xl border border-gray-700/60 flex items-center justify-center p-6 text-center">
+                        
+                        <!-- Front Face -->
+                        <div class="absolute inset-0 backface-hidden flex flex-col items-center justify-center p-6">
+                            <span id="cardNo" class="absolute top-4 left-6 text-xs font-bold text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full border border-brand-500/20">1</span>
+                            <button onclick="speakCurrentVocab(event)" class="absolute top-4 right-6 w-9 h-9 rounded-full bg-gray-800/80 hover:bg-brand-500 hover:text-white text-gray-300 transition flex items-center justify-center" title="發音">
+                                <i class="fa-solid fa-volume-high text-sm"></i>
+                            </button>
+                            
+                            <h3 id="cardKanji" class="text-4xl sm:text-5xl font-extrabold text-white tracking-wide mb-4">電鍍機台</h3>
+                            
+                            <span class="mt-6 text-xs text-gray-400 flex items-center gap-1">
+                                <i class="fa-solid fa-rotate"></i> 點擊翻面查看 英文 (English) 與 意思
+                            </span>
+                        </div>
+
+                        <!-- Back Face -->
+                        <div class="absolute inset-0 backface-hidden rotate-y-180 flex flex-col items-center justify-center p-6 bg-gray-900/95 rounded-3xl">
+                            <span class="text-xs uppercase tracking-widest text-gray-400 mb-2">英文 (English)</span>
+                            <h4 id="cardPinyin" class="text-2xl sm:text-3xl font-bold text-brand-300 mb-4">diàn dù jī tái</h4>
+                            <span class="text-xs uppercase tracking-widest text-gray-400 mb-2">意思</span>
+                            <p id="cardEnglish" class="text-xl font-medium text-white">Plating Machine</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Flashcard Controls -->
+                <div class="flex items-center justify-between w-full mt-6 px-4">
+                    <button onclick="prevVocab()" class="px-5 py-2.5 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-gray-200 text-sm font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-chevron-left"></i> 上一個
+                    </button>
+                    
+                    <span id="vocabCounter" class="text-xs font-semibold text-gray-400">1 / 7</span>
+
+                    <button onclick="nextVocab()" class="px-5 py-2.5 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-gray-200 text-sm font-medium transition flex items-center gap-2">
+                        下一個 <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER CONTROLS & PROGRESS BAR -->
+    <footer class="h-16 border-t border-gray-800/80 px-6 flex items-center justify-between z-20 glass-card">
+        <!-- Progress Indicator -->
+        <div class="flex items-center gap-4">
+            <span id="slideIndicator" class="text-xs font-semibold text-brand-400 tracking-wider">1 / 5</span>
+            <div class="w-24 sm:w-40 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                <div id="progressBar" class="h-full bg-gradient-to-r from-brand-500 to-cyan-400 w-1/5 transition-all duration-300"></div>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex items-center gap-3">
+            <button onclick="prevSlide()" class="px-4 py-2 rounded-lg bg-gray-800/80 hover:bg-gray-700 text-gray-300 text-xs font-semibold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-left"></i> <span>上一頁</span>
+            </button>
+            <button onclick="nextSlide()" class="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md shadow-brand-500/20 transition flex items-center gap-1.5">
+                <span>下一頁</span> <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Slide 4 Lessons Data (100% Exact from PPT)
+        const lessonsData = [
+            { no: "Lesson 1", eng: "Phonetics & Pronunciation Basics", topic: "發音與語音基礎拼音", detail: "學習基本發音與正確口型" },
+            { no: "Lesson 2", eng: "Initials Comparison & Tones", topic: "聲母對比與四聲聲調", detail: "zh, ch, sh, r 與 z, c, s 對比及四聲練習" },
+            { no: "Lesson 3", eng: "Self Introduction", topic: "自我介紹", detail: "說明姓名、國籍與背景" },
+            { no: "Lesson 4", eng: "Workplace Greetings", topic: "同事問候", detail: "日常工作打招呼與問候" },
+            { no: "Lesson 5", eng: "Daily Greetings & Casual Talk", topic: "日常寒暄", detail: "常見問候語（問候近況、「吃飽了嗎？」）" },
+            { no: "Lesson 6", eng: "Dining & Ordering", topic: "用餐用語", detail: "點餐、調整冰塊/甜度，以及外帶表達" },
+            { no: "Lesson 7", eng: "Workplace Location", topic: "工作地點說明", detail: "說明工作地點（日月光/廠房與站別）" },
+            { no: "Lesson 8", eng: "Daily Work Tasks", topic: "工作內容說明", detail: "簡單說明每日工作項目" },
+            { no: "Lesson 9", eng: "Workplace Communication", topic: "工作溝通", detail: "與組長、隊長/同事基本簡短對話" },
+            { no: "Lesson 10", eng: "Station Equipment", topic: "機台名稱", detail: "學習站別設備名稱與常用術語" },
+            { no: "Lesson 11", eng: "Tools & Machine Parts", topic: "工具與零件", detail: "認識單調工具/機台與機台零件" },
+            { no: "Lesson 12", eng: "Cleanroom Environment & Rules", topic: "無塵室環境", detail: "了解無塵室規範與日常作業" },
+            { no: "Lesson 13", eng: "PPE & Safety Regulations", topic: "防護裝備與安全規範", detail: "個人防護裝備 (PPE) 與安全規範" },
+            { no: "Lesson 14", eng: "Phone Answering & Transfers", topic: "電話接聽與轉接", detail: "接聽內部電話，說明同仁不在位置/在崗位上" },
+            { no: "Lesson 15", eng: "Comprehensive Workplace Review", topic: "廠區實用中文總複習", detail: "廠區用語與工作情境綜合複習" },
+            { no: "Lesson 16", eng: "Final Conversation Practice", topic: "綜合對話演練", detail: "綜合對話模擬與實務口語評估" }
+        ];
+
+        // Slide 5 Vocabulary Data (100% Exact from PPT)
+        const vocabData = [
+            { no: 1, kanji: "電鍍機台", pinyin: "diàn dù jī tái", english: "Plating Machine" },
+            { no: 2, kanji: "金屬蝕刻機台", pinyin: "īn shǔ shí kè jī tái", english: "Metal Etcher" },
+            { no: 3, kanji: "蝕刻機台", pinyin: "shí kè jī tái", english: "Etching Machine" },
+            { no: 4, kanji: "車用專機", pinyin: "chē yòng zhuān jī", english: "Automotive Dedicated Tool" },
+            { no: 5, kanji: "真空幫浦", pinyin: "zhēn kōng bāng pǔ", english: "Vacuum Pump" },
+            { no: 6, kanji: "冰水機", pinyin: "bīng shuǐ jī", english: "Chiller" },
+            { no: 7, kanji: "空壓機", pinyin: "kōng yā jī", english: "Air Compressor" }
+        ];
+
+        let currentSlide = 0;
+        const totalSlides = 5;
+        let currentVocabIndex = 0;
+        let isFlipped = false;
+
+        window.onload = function() {
+            renderLessonTable(lessonsData);
+            updateVocabCard();
+            updateSlideUI();
+
+            // Keyboard Navigation support
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowRight' || e.key === 'Space' || e.key === 'PageDown') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                    prevSlide();
+                }
+            });
+        };
+
+        function renderLessonTable(data) {
+            const tbody = document.getElementById('lessonTableBody');
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">無符合條件之資料</td></tr>`;
+                return;
+            }
+
+            data.forEach((item) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-brand-500/10 transition border-b border-gray-800/40";
+                tr.innerHTML = `
+                    <td class="p-3 text-center font-bold text-brand-400">${item.no}</td>
+                    <td class="p-3 font-medium text-gray-300">${item.eng}</td>
+                    <td class="p-3 font-medium text-white">${item.topic}</td>
+                    <td class="p-3 text-gray-300">${item.detail}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterLessons() {
+            const query = document.getElementById('lessonSearch').value.toLowerCase();
+            const filtered = lessonsData.filter(item => 
+                item.no.toLowerCase().includes(query) ||
+                item.eng.toLowerCase().includes(query) ||
+                item.topic.toLowerCase().includes(query) || 
+                item.detail.toLowerCase().includes(query)
+            );
+            renderLessonTable(filtered);
+        }
+
+        function updateSlideUI() {
+            for (let i = 0; i < totalSlides; i++) {
+                const slide = document.getElementById(`slide-${i}`);
+                if (slide) slide.classList.remove('active');
+            }
+
+            const activeSlide = document.getElementById(`slide-${currentSlide}`);
+            if (activeSlide) activeSlide.classList.add('active');
+
+            document.getElementById('slideIndicator').innerText = `${currentSlide + 1} / ${totalSlides}`;
+            document.getElementById('progressBar').style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+            document.getElementById('slideSelect').value = currentSlide;
+        }
+
+        function goToSlide(index) {
+            if (index >= 0 && index < totalSlides) {
+                currentSlide = index;
+                updateSlideUI();
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlideUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlideUI();
+            }
+        }
+
+        function flipCard() {
+            const inner = document.getElementById('flashcardInner');
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                inner.classList.add('rotate-y-180');
+            } else {
+                inner.classList.remove('rotate-y-180');
+            }
+        }
+
+        function updateVocabCard() {
+            const item = vocabData[currentVocabIndex];
+            
+            isFlipped = false;
+            document.getElementById('flashcardInner').classList.remove('rotate-y-180');
+
+            setTimeout(() => {
+                document.getElementById('cardNo').innerText = item.no;
+                document.getElementById('cardKanji').innerText = item.kanji;
+                document.getElementById('cardPinyin').innerText = item.pinyin;
+                document.getElementById('cardEnglish').innerText = item.english;
+                document.getElementById('vocabCounter').innerText = `${currentVocabIndex + 1} / ${vocabData.length}`;
+            }, 150);
+        }
+
+        function nextVocab() {
+            currentVocabIndex = (currentVocabIndex + 1) % vocabData.length;
+            updateVocabCard();
+        }
+
+        function prevVocab() {
+            currentVocabIndex = (currentVocabIndex - 1 + vocabData.length) % vocabData.length;
+            updateVocabCard();
+        }
+
+        function speakCurrentVocab(event) {
+            event.stopPropagation();
+            const item = vocabData[currentVocabIndex];
+            
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(item.kanji);
+                utterance.lang = 'zh-TW';
+                utterance.rate = 0.8;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error enabling fullscreen: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
